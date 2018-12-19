@@ -4,6 +4,8 @@
 
 Scheduling with polymer.
 
+![screenshot](./images/screenshot.png "Screen Shot")
+
 ## TODO
 
 [ ] Integrate GET requests and loader
