@@ -1,4 +1,6 @@
 import { LitElement, html } from '@polymer/lit-element';
+import '@polymer/iron-icon/iron-icon.js';
+import '@polymer/iron-icons/iron-icons.js';
 import moment from 'moment';
 import 'lodash'; // ?
 
@@ -25,12 +27,12 @@ class PolymerSchedule extends LitElement {
         }
         div.time-slot {
           width: calc(100% - 14px);
-          min-height: 16px;
+          min-height: 32px;
           background-color: lightgray;
           position: absolute;
           font-size: 10pt;
           padding: 0 7px;
-          border-left: solid 3px #545454; 
+          border-left: solid 3px #545454;
         }
         span.day-title {
           display: block;
@@ -38,6 +40,11 @@ class PolymerSchedule extends LitElement {
           color: #545454;
           font-weight: 300;
           text-align: center;
+        }
+        iron-icon.tiny {
+          --iron-icon-height: 18px;
+          --iron-icon-width: 18px;
+          color: rgba(53, 53, 53, 0.35);
         }
       </style>
 
@@ -84,6 +91,8 @@ class PolymerSchedule extends LitElement {
     ];
     this.daysUI = [];
 
+
+
     var firstStart = 2401;
     var lastEnd = -1;
     var scheduleHeight = 720;
@@ -108,12 +117,17 @@ class PolymerSchedule extends LitElement {
         var _endTime = parseInt(moment(event.endTime).format('HHmm'), 10);
         eventsUI.push(html`
           <div class="time-slot" style="height:${(_endTime-_startTime)*(scheduleHeight/timeDiff)}px;top:${(_startTime-firstStart)*(scheduleHeight/timeDiff)}px;">
-            <div style="position:absolute;top:0;right:3px;text-align:right;">+</div>
-            <strong>${moment(event.startTime).format('h:mm A')}</strong> 
-            ${(event.people.length > 0) 
-              ? html`${event.people}` 
-              : html`${event.name}`
-            }
+            <div style="width:20px;position:absolute;top:0;right:3px;text-align:right;">
+              <iron-icon class="tiny" icon="view-stream"></iron-icon>
+              <iron-icon class="tiny" icon="info"></iron-icon>
+            </div>
+            <div style="padding-right:20px;">
+              <strong>${moment(event.startTime).format('h:mm A')}</strong> 
+              ${(event.people.length > 0) 
+                ? html`${event.people}` 
+                : html`${event.name}`
+              }
+            </div>
           </div>
         `);
       });
