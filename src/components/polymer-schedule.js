@@ -1,4 +1,6 @@
 import { LitElement, html } from '@polymer/lit-element';
+import moment from 'moment';
+import 'lodash'; // ?
 
 // This element is *not* connected to the Redux store.
 class PolymerSchedule extends LitElement {
@@ -40,57 +42,17 @@ class PolymerSchedule extends LitElement {
       </style>
 
       <div class="main">
-        ${this.daysUI}
-        <!-- <div class="day">
-          <span class="day-title">Sunday</span>
-          <div class="time-slots">
-            <div class="time-slot" style="height:9px;top:240px;">
-              <strong>8am</strong> Temoc Hsoohw
-            </div>
-          </div>
-        </div>
-        <div class="day">
-          <span class="day-title">Monday</span>
-          <div class="time-slots">
-            <div class="time-slot" style="height:28.75px;top:300px;">
-            <strong>12pm</strong> Temoc Hsoohw
-            </div>
-          </div>
-        </div>
-        <div class="day">
-          <span class="day-title">Tuesday</span>
-          <div class="time-slots">
-          </div>
-        </div>
-        <div class="day">
-        <span class="day-title">Wednesday</span>
-          <div class="time-slots">
-          </div>
-        </div>
-        <div class="day">
-          <span class="day-title">Thursday</span>
-          <div class="time-slots">
-          </div>
-        </div>
-        <div class="day">
-          <span class="day-title">Friday</span>
-          <div class="time-slots">
-            <div class="time-slot" style="height:76.25px;top:375px;">
-              <strong>3pm</strong> Temoc Hsoohw
-            </div>
-          </div>
-        </div>
-        <div class="day">
-          <span class="day-title">Saturday</span>
-          <div class="time-slots">
-          </div>
-        </div> -->
+        ${this.loading 
+          ? html`Loading...`
+          : html`${this.daysUI}`
+        }
       </div>
     `;
   }
 
   static get properties() {
     return {
+      loading: { type: Boolean },
       daysUI: { type: Array },
       data: { type: Array }, // `value` key is useless
     }
@@ -99,23 +61,26 @@ class PolymerSchedule extends LitElement {
   constructor() {
     super();
 
+    this.loading = true;
+
     // GET api/schedules/{id}/{week}
     // 'id': String hash
-    // 'week': Number between 1 and 52
+    // 'week': Number between 1 and 52    
     this.data = [
-      { day: 'sunday', events: [
-        { name: "Item 1", location: "", startTime: 730, endTime: 800, people: ["Temoc Hsoohw, Enarc"], notes: "Hello world!" },
+      { day: 'Sunday', events: [
+        { name: "Item 1", location: "", locationUrl: "", startTime: "2018-12-16T07:30:00-06:00", endTime: "2018-12-16T08:00:00-06:00", people: ["Temoc Hsoohw, Enarc"], notes: "Hello world!" },
       ] },
-      { day: 'monday', events: [
-        { name: "Item 2", location: "Building C", startTime: 1200, endTime: 1315, people: ["Temoc Hsoohw"], notes: "" },
+      { day: 'Monday', events: [
+        { name: "Item 2a", location: "Building C", locationUrl: "", startTime: "2018-12-17T12:00:00-06:00", endTime: "2018-12-17T13:15:00-06:00", people: ["Temoc Hsoohw"], notes: "" },
+        { name: "Item 2b", location: "", locationUrl: "", startTime: "2018-12-17T08:00:00-06:00", endTime: "2018-12-17T09:15:00-06:00", people: ["Temoc Hsoohw"], notes: "" },
       ] },
-      { day: 'tuesday', events: [] },
-      { day: 'wednesday', events: [] },
-      { day: 'thursday', events: [] },
-      { day: 'friday', events: [
-        { name: "Item 3", location: "", startTime: 1500, endTime: 1805, people: ["Temoc Hsoohw"], notes: "" },
+      { day: 'Tuesday', events: [] },
+      { day: 'Wednesday', events: [] },
+      { day: 'Thursday', events: [] },
+      { day: 'Friday', events: [
+        { name: "Item 3", location: "", locationUrl: "", startTime: "2018-12-21T15:00:00-06:00", endTime: "2018-12-21T18:05:00-06:00", people: [], notes: "" },
       ] },
-      { day: 'saturday', events: [] },
+      { day: 'Saturday', events: [] },
     ];
     this.daysUI = [];
 
@@ -123,11 +88,14 @@ class PolymerSchedule extends LitElement {
     var lastEnd = -1;
     var scheduleHeight = 720;
     this.data.forEach((day) => {
-      // TODO: sort event times here if needed
-      day.events.forEach((event) => {
-        if (event.startTime < firstStart) firstStart = event.startTime;
-        if (event.endTime > lastEnd) lastEnd = event.endTime;
-      });
+      // Sort by start date
+      day.events = _.sortBy(day.events, (dateObj) => { return moment(dateObj.startTime).toDate() });
+      if (day.events.length > 0) {
+        var _startTime = parseInt(moment(day.events[0].startTime).format('HHmm'), 10);
+        var _endTime = parseInt(moment(day.events[day.events.length-1].endTime).format('HHmm'), 10);
+        if (_startTime < firstStart) firstStart = _startTime;
+        if (_endTime > lastEnd) lastEnd = _endTime;
+      }
     });
     if (firstStart % 100 != 0) firstStart = Math.floor(firstStart/100) * 100;
     if (lastEnd % 100 != 0) lastEnd = Math.ceil(lastEnd/100) * 100;
@@ -136,9 +104,16 @@ class PolymerSchedule extends LitElement {
     this.data.forEach((day) => {
       var eventsUI = [];
       day.events.forEach((event) => {
+        var _startTime = parseInt(moment(event.startTime).format('HHmm'), 10);
+        var _endTime = parseInt(moment(event.endTime).format('HHmm'), 10);
         eventsUI.push(html`
-          <div class="time-slot" style="height:${(event.endTime-event.startTime)*(scheduleHeight/timeDiff)}px;top:${(event.startTime-firstStart)*(scheduleHeight/timeDiff)}px;">
-            <strong>${event.startTime}</strong> ${event.people} <!-- show title otherwise -->
+          <div class="time-slot" style="height:${(_endTime-_startTime)*(scheduleHeight/timeDiff)}px;top:${(_startTime-firstStart)*(scheduleHeight/timeDiff)}px;">
+            <div style="position:absolute;top:0;right:3px;text-align:right;">+</div>
+            <strong>${moment(event.startTime).format('h:mm A')}</strong> 
+            ${(event.people.length > 0) 
+              ? html`${event.people}` 
+              : html`${event.name}`
+            }
           </div>
         `);
       });
@@ -151,6 +126,8 @@ class PolymerSchedule extends LitElement {
         </div>
       `);
     });
+
+    this.loading = false;
   }
 }
 
