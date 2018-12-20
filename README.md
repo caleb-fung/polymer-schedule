@@ -8,12 +8,14 @@ Scheduling with polymer.
 
 ## TODO
 
-[ ] Integrate GET requests and loader
+- [ ] Integrate GET requests and loader
 
-[ ] Collapse into tabs
+- [ ] Collapse into tabs
 
-[ ] Dynamic height
+- [ ] Overlapping events
 
-[ ] Colors
+- [ ] Dynamic height
 
-[ ] Dialog card
+- [ ] Colors
+
+- [ ] Dialog card

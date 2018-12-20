@@ -12,7 +12,7 @@ class PolymerSchedule extends LitElement {
         }
         div.day {
           flex-grow: 1;
-          min-width: 100px;
+          min-width: 150px;
         }
         div.time-slots {
           min-height: 720px;
@@ -40,7 +40,8 @@ class PolymerSchedule extends LitElement {
       </style>
 
       <div class="main">
-        <div class="day">
+        ${this.daysUI}
+        <!-- <div class="day">
           <span class="day-title">Sunday</span>
           <div class="time-slots">
             <div class="time-slot" style="height:9px;top:240px;">
@@ -83,13 +84,14 @@ class PolymerSchedule extends LitElement {
           <span class="day-title">Saturday</span>
           <div class="time-slots">
           </div>
-        </div>
+        </div> -->
       </div>
     `;
   }
 
   static get properties() {
     return {
+      daysUI: { type: Array },
       data: { type: Array }, // `value` key is useless
     }
   }
@@ -101,22 +103,54 @@ class PolymerSchedule extends LitElement {
     // 'id': String hash
     // 'week': Number between 1 and 52
     this.data = [
-      { day: 'sunday', items: [
-        { name: "Item 1", location: "", startTime: 800, endTime: 830, people: ["Temoc Hsoohw"], notes: "Hello world!" },
+      { day: 'sunday', events: [
+        { name: "Item 1", location: "", startTime: 730, endTime: 800, people: ["Temoc Hsoohw, Enarc"], notes: "Hello world!" },
       ] },
-      { day: 'monday', items: [
+      { day: 'monday', events: [
         { name: "Item 2", location: "Building C", startTime: 1200, endTime: 1315, people: ["Temoc Hsoohw"], notes: "" },
       ] },
-      { day: 'tuesday', items: [] },
-      { day: 'wednesday', items: [] },
-      { day: 'thursday', items: [] },
-      { day: 'friday', items: [
+      { day: 'tuesday', events: [] },
+      { day: 'wednesday', events: [] },
+      { day: 'thursday', events: [] },
+      { day: 'friday', events: [
         { name: "Item 3", location: "", startTime: 1500, endTime: 1805, people: ["Temoc Hsoohw"], notes: "" },
       ] },
-      { day: 'saturday', items: [] },
+      { day: 'saturday', events: [] },
     ];
+    this.daysUI = [];
 
-    
+    var firstStart = 2401;
+    var lastEnd = -1;
+    var scheduleHeight = 720;
+    this.data.forEach((day) => {
+      // TODO: sort event times here if needed
+      day.events.forEach((event) => {
+        if (event.startTime < firstStart) firstStart = event.startTime;
+        if (event.endTime > lastEnd) lastEnd = event.endTime;
+      });
+    });
+    if (firstStart % 100 != 0) firstStart = Math.floor(firstStart/100) * 100;
+    if (lastEnd % 100 != 0) lastEnd = Math.ceil(lastEnd/100) * 100;
+    var timeDiff = lastEnd - firstStart;
+
+    this.data.forEach((day) => {
+      var eventsUI = [];
+      day.events.forEach((event) => {
+        eventsUI.push(html`
+          <div class="time-slot" style="height:${(event.endTime-event.startTime)*(scheduleHeight/timeDiff)}px;top:${(event.startTime-firstStart)*(scheduleHeight/timeDiff)}px;">
+            <strong>${event.startTime}</strong> ${event.people} <!-- show title otherwise -->
+          </div>
+        `);
+      });
+      this.daysUI.push(html`
+        <div class="day">
+          <span class="day-title">${day.day}</span>
+          <div class="time-slots">
+            ${eventsUI}
+          </div>
+        </div>
+      `);
+    });
   }
 }
 
