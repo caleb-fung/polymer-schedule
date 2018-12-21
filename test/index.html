@@ -1,6 +1,6 @@
 <!--
 @license
-Copyright (c) 2018 The Polymer Project Authors. All rights reserved.
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
 This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
 The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
 The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
@@ -12,20 +12,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
     <title>Tests</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="../../node_modules/mocha/mocha.js"></script>
-    <script src="../../node_modules/wct-mocha/wct-mocha.js"></script>
+
+    <script src="../node_modules/wct-browser-legacy/browser.js"></script>
   </head>
   <body>
     <script>
       WCT.loadSuites([
         // Load 'my-view1.html' test suite, using native shadow dom
-        'counter-element.html',
+        'my-view1.html?dom=shadow',
         // Load 'my-view1.html' test suite, using shadydom
-        'counter-element.html?wc-shadydom=true&wc-ce=true',
-        'views-a11y.html',
-        'views-a11y.html?wc-shadydom=true&wc-ce=true',
+        'my-view1.html?wc-shadydom=true',
       ]);
     </script>
   </body>

@@ -1,13 +1,14 @@
 {
   "entrypoint": "index.html",
-  "shell": "src/components/my-app.js",
+  "shell": "src/my-app.js",
   "sources": [
     "images/**/*"
   ],
   "extraDependencies": [
     "manifest.json",
-    "node_modules/@webcomponents/webcomponentsjs/**",
-    "push-manifest.json"
+    "node_modules/@webcomponents/webcomponentsjs/*.js",
+    "!node_modules/@webcomponents/webcomponentsjs/gulpfile.js",
+    "node_modules/@webcomponents/webcomponentsjs/bundles/*.js"
   ],
   "builds": [
     {
@@ -34,7 +35,6 @@
         "es2015"
       ],
       "js": {
-        "compile": "es2015",
         "minify": true,
         "transformModulesToAmd": true
       },
@@ -50,8 +50,8 @@
     {
       "name": "es5-bundled",
       "js": {
-        "compile": "es5",
         "minify": true,
+        "compile": true,
         "transformModulesToAmd": true
       },
       "css": {
@@ -65,5 +65,10 @@
     }
   ],
   "moduleResolution": "node",
-  "npm": true
+  "npm": true,
+  "lint": {
+    "rules": [
+      "polymer-3"
+    ]
+  }
 }
