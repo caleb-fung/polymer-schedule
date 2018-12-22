@@ -6,7 +6,7 @@
   "license": "BSD-3-Clause",
   "repository": "Polymer/polymer-starter-kit",
   "scripts": {
-    "start": "polymer serve",
+    "start": "./node_modules/nodemon/bin/nodemon.js dummy-server.js & polymer serve",
     "build": "polymer build",
     "lint": "polymer lint",
     "test": "polymer test",
@@ -15,6 +15,7 @@
   "dependencies": {
     "@polymer/app-layout": "^3.0.0-pre.15",
     "@polymer/app-route": "^3.0.0-pre.15",
+    "@polymer/iron-ajax": "^3.0.1",
     "@polymer/iron-flex-layout": "^3.0.0-pre.15",
     "@polymer/iron-iconset-svg": "^3.0.0-pre.15",
     "@polymer/iron-media-query": "^3.0.0-pre.15",
@@ -22,7 +23,10 @@
     "@polymer/iron-selector": "^3.0.0-pre.15",
     "@polymer/paper-icon-button": "^3.0.0-pre.15",
     "@polymer/polymer": "^3.0.0",
-    "@webcomponents/webcomponentsjs": "^2.0.0"
+    "@webcomponents/webcomponentsjs": "^2.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "nodemon": "^1.18.9"
   },
   "devDependencies": {
     "polymer-cli": "^1.7.1",
