@@ -1,6 +1,11 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import '@polymer/iron-ajax/iron-ajax.js';
 import '@polymer/paper-dialog/paper-dialog.js';
+import '@polymer/paper-card/paper-card.js';
+import '@polymer/iron-icon/iron-icon.js';
+// import '@polymer/iron-icons/iron-icons.js';
+import '@polymer/iron-icons/device-icons.js';
+import '@polymer/iron-icons/notification-icons.js';
 import moment from 'moment';
 import './shared-styles.js';
 
@@ -44,22 +49,35 @@ class PolymerSchedule extends PolymerElement {
           position: absolute;
           padding: 0 5px;
         }
-        paper-dialog {
-          width: 300px;
-          margin: 0;
-          position: absolute;
-          z-index: 1;
-        }
-        paper-dialog:focus {
-          outline: none;
-        }
         .event-cover {
           height: 100%;
           width: 100%;
           position: absolute;
           left: 0;
           top: 0;
+          cursor: pointer;
         }
+
+        /* Dialog */
+        paper-card {
+          width: 300px;
+          margin: 0;
+          padding: 5px 9px;
+          position: absolute;
+          z-index: 1;
+        }
+        paper-card:focus {
+          outline: none;
+        }
+        paper-card > h2 {
+          font-size: 16pt;
+          margin: 0 0 6px 0;
+        }
+        paper-card > p {
+          font-size: 11pt;
+          margin: 3px 0 3px 0;
+        }
+        
       </style>
 
       <iron-ajax
@@ -70,17 +88,20 @@ class PolymerSchedule extends PolymerElement {
         on-response="handleResponse"
         debounce-duration="300">
       </iron-ajax>
+      <!-- input? -->
 
       <template is="dom-if" if="[[loading]]">
         Loading...
       </template>
       <template is="dom-if" if="[[!loading]]">
-        <div class="schedule-main">
-          <paper-dialog id="dialog" style$="top:[[dialogData.top]]px;left:[[dialogData.left]]px;">
+        <div class="schedule-main" on-tap="_closeDialog">
+          <paper-card elevation="3" hidden$="[[hidden]]" style$="top:[[dialogData.top]]px;left:[[dialogData.left]]px;">
             <h2>[[dialogData.title]]</h2>
-            <p>[[dialogData.time]]</p>
-            <p>[[dialogData.notes]]</p>
-          </paper-dialog>
+            <p><iron-icon icon="device:access-time"></iron-icon> [[dialogData.time]]</p>
+            <template is="dom-if" if="[[_isNonEmptyString(dialogData.notes)]]">
+              <p><iron-icon icon="notification:event-note"></iron-icon> [[dialogData.notes]]</p>
+            </template>
+          </paper-card>
           <dom-repeat items="{{data.data}}" indexAs="index">
             <template>
               <div class="day-container">
@@ -123,6 +144,10 @@ class PolymerSchedule extends PolymerElement {
           time: '',
           notes: ''
         }
+      },
+      hidden: { // Won't work if part of `dialogData`
+        type: Boolean, 
+        value: true 
       }
     };
   }
@@ -155,19 +180,26 @@ class PolymerSchedule extends PolymerElement {
   _openDialog(event) {
     const mainBounds = event.detail.sourceEvent.path[4].getBoundingClientRect();
     const parentBounds = event.detail.sourceEvent.path[0].getBoundingClientRect();
-
-    const dialog = this.shadowRoot.querySelector('#dialog');
     const item = event.model.item;
 
     this.dialogData = {
-      top: 24,
+      top: parentBounds.top-mainBounds.top,
       left: (parentBounds.right-mainBounds.left+300 < mainBounds.right-mainBounds.left) ? parentBounds.right-mainBounds.left : parentBounds.left-mainBounds.left-300,
       title: item.title,
       time: moment(item.startTime).format('h:mm A') + ' to ' + moment(item.endTime).format('h:mm A'),
       notes: item.notes
     };
-    
-    dialog.open();
+    this.hidden = false;
+  }
+
+  _closeDialog(event) {
+    if (event.detail.sourceEvent.path[0].className !== 'event-cover') {
+      this.hidden = true;
+    }
+  }
+
+  _isNonEmptyString(str) {
+    return (str && str.length > 0);
   }
 }
 
