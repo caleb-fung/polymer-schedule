@@ -77,6 +77,11 @@ class PolymerSchedule extends PolymerElement {
           font-size: 11pt;
           margin: 3px 0 3px 0;
         }
+        paper-card > p > iron-icon {
+          --iron-icon-height: 18px;
+          --iron-icon-width: 18px;
+          margin-right: 6px;
+        }
         
       </style>
 
@@ -88,7 +93,6 @@ class PolymerSchedule extends PolymerElement {
         on-response="handleResponse"
         debounce-duration="300">
       </iron-ajax>
-      <!-- input? -->
 
       <template is="dom-if" if="[[loading]]">
         Loading...
@@ -107,9 +111,9 @@ class PolymerSchedule extends PolymerElement {
               <div class="day-container">
                 <div class="day-title">[[item.day]]</div>
                 <div class$="[[_eventsContainerClasses(index)]]">
-                  <dom-repeat items="{{_preprocessEvents(item.events)}}">
+                  <dom-repeat items="{{_preprocessEvents(item.events)}}" indexAs="_index">
                     <template>
-                      <div class="event" style$="background-color:#[[item.color]];width:100%;">
+                      <div class="event" style$="background-color:#[[item.color]];height:[[_computeEventHeight(item)]]px;width:[[_computeEventWidth(item,_index)]]%;top:[[_computeEventOffset(item)]]px;">
                         <div class="event-cover" on-tap="_openDialog" data-item$="[[item]]"></div>
                         <strong>[[_prettyTime(item.startTime)]]</strong>
                         [[item.title]]
@@ -130,6 +134,10 @@ class PolymerSchedule extends PolymerElement {
       loading: {
         type: Boolean,
         value: true
+      },
+      scheduleHeight: {
+        type: Number,
+        value: 1224
       },
       data: {
         type: Array,
@@ -159,7 +167,6 @@ class PolymerSchedule extends PolymerElement {
   handleResponse(res) {
     this.data = res.detail.xhr.response;
     this.loading = false;
-    console.log(this.data);
   }
 
   // This is so stupid
@@ -200,6 +207,21 @@ class PolymerSchedule extends PolymerElement {
 
   _isNonEmptyString(str) {
     return (str && str.length > 0);
+  }
+
+  _computeEventHeight(event) {
+    const startTime = Number.parseInt(moment(event.startTime).format('HHmm'), 10);
+    const endTime = Number.parseInt(moment(event.endTime).format('HHmm'), 10);
+    return (endTime-startTime)*(this.scheduleHeight/2400);
+  }
+
+  _computeEventWidth(event,index) {
+    return 100;
+  }
+
+  _computeEventOffset(event) {
+    const startTime = Number.parseInt(moment(event.startTime).format('HHmm'), 10);
+    return startTime*(this.scheduleHeight/2400);
   }
 }
 

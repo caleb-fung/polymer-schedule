@@ -16,7 +16,7 @@ app.get('/api/schedules/:id/:week(\\d+)/', function (req, res) {
       ] },
       { day: 'Monday', events: [
         { title: "Item 2a", location: "", locationUrl: "", startTime: "2018-12-17T08:00:00-06:00", endTime: "2018-12-17T09:15:00-06:00", people: ["Temoc Hsoohw"], notes: "", color: "EF9A9A" },
-        { title: "Item 2b", location: "Building C", locationUrl: "", startTime: "2018-12-17T12:00:00-06:00", endTime: "2018-12-17T13:15:00-06:00", people: ["Temoc Hsoohw"], notes: "", color: "80CBC4" }
+        { title: "Item 2b", location: "Building C", locationUrl: "", startTime: "2018-12-17T08:30:00-06:00", endTime: "2018-12-17T10:00:00-06:00", people: ["Temoc Hsoohw"], notes: "", color: "80CBC4" }
       ] },
       { day: 'Tuesday', events: [] },
       { day: 'Wednesday', events: [] },
