@@ -48,6 +48,9 @@ class PolymerSchedule extends PolymerElement {
           color: #212121;
           position: absolute;
           padding: 0 5px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
         }
         .event-cover {
           height: 100%;
@@ -82,7 +85,6 @@ class PolymerSchedule extends PolymerElement {
           --iron-icon-width: 18px;
           margin-right: 6px;
         }
-        
       </style>
 
       <iron-ajax
@@ -113,7 +115,7 @@ class PolymerSchedule extends PolymerElement {
                 <div class$="[[_eventsContainerClasses(index)]]">
                   <dom-repeat items="{{_preprocessEvents(item.events)}}" indexAs="_index">
                     <template>
-                      <div class="event" style$="background-color:#[[item.color]];height:[[_computeEventHeight(item)]]px;width:[[_computeEventWidth(item,_index)]]%;top:[[_computeEventOffset(item)]]px;">
+                      <div class="event" style$="background-color:#[[item.color]];width:calc([[item.width]]% - 10px);left:[[item.left]]%;height:[[item.height]]px;top:[[item.top]]px;">
                         <div class="event-cover" on-tap="_openDialog" data-item$="[[item]]"></div>
                         <strong>[[_prettyTime(item.startTime)]]</strong>
                         [[item.title]]
@@ -166,6 +168,53 @@ class PolymerSchedule extends PolymerElement {
 
   handleResponse(res) {
     this.data = res.detail.xhr.response;
+
+    this.data.data.forEach((day) => {
+      var overlaps = [];
+      for (const i in day.events) {
+        day.events[i].width = 100;
+        day.events[i].left = 0;
+        const startTime = Number.parseInt(moment(day.events[i].startTime).format('HHmm'), 10);
+        const endTime = Number.parseInt(moment(day.events[i].endTime).format('HHmm'), 10);
+        day.events[i]._startTime = startTime;
+        day.events[i]._endTime = endTime;
+        day.events[i].top = startTime*(this.scheduleHeight/2400);
+        day.events[i].height = (endTime-startTime)*(this.scheduleHeight/2400);
+        if (i == 0) continue;
+        if (day.events[i].startTime <= day.events[i-1].endTime) {
+          if (i == 1) overlaps.push(day.events[i-1]);
+          overlaps.push(day.events[i]);
+        }
+      }
+      var cols = overlaps.length;
+      for (const i in overlaps) {
+        var modified = false;
+        overlaps[i].startUnder = -1;
+        overlaps[i].units = 1;
+        for (const j in overlaps) {
+          if (overlaps[i]._startTime >= overlaps[j]._endTime) {
+            if (!modified) {
+              cols--;
+              overlaps[i].startUnder = j;
+              modified = true;
+              overlaps[i].units--;
+            }
+            overlaps[i].units++;
+          }
+        }
+      }
+      for (const i in overlaps) {
+        overlaps[i].width = overlaps[i].units*(100/cols);
+        if (overlaps[i].startUnder != -1) {
+          overlaps[i].left = overlaps[i].startUnder*(100/cols);
+        } else {
+          overlaps[i].left = i*(100/cols);
+        }
+      }
+    });
+
+    console.log(this.data);
+
     this.loading = false;
   }
 
@@ -175,7 +224,7 @@ class PolymerSchedule extends PolymerElement {
   }
 
   _prettyTime(timeString) {
-    return moment(timeString).format('h:mm A');
+    return moment(timeString).format('h:mma');
   }
 
   _preprocessEvents(events) {
@@ -193,7 +242,7 @@ class PolymerSchedule extends PolymerElement {
       top: parentBounds.top-mainBounds.top,
       left: (parentBounds.right-mainBounds.left+300 < mainBounds.right-mainBounds.left) ? parentBounds.right-mainBounds.left : parentBounds.left-mainBounds.left-300,
       title: item.title,
-      time: moment(item.startTime).format('h:mm A') + ' to ' + moment(item.endTime).format('h:mm A'),
+      time: moment(item.startTime).format('h:mma') + ' to ' + moment(item.endTime).format('h:mma'),
       notes: item.notes
     };
     this.hidden = false;
@@ -209,20 +258,20 @@ class PolymerSchedule extends PolymerElement {
     return (str && str.length > 0);
   }
 
-  _computeEventHeight(event) {
-    const startTime = Number.parseInt(moment(event.startTime).format('HHmm'), 10);
-    const endTime = Number.parseInt(moment(event.endTime).format('HHmm'), 10);
-    return (endTime-startTime)*(this.scheduleHeight/2400);
-  }
+  // _computeEventHeight(event) {
+  //   const startTime = Number.parseInt(moment(event.startTime).format('HHmm'), 10);
+  //   const endTime = Number.parseInt(moment(event.endTime).format('HHmm'), 10);
+  //   return (endTime-startTime)*(this.scheduleHeight/2400);
+  // }
 
-  _computeEventWidth(event,index) {
-    return 100;
-  }
+  // _computeEventWidth(event,index) {
+  //   return 100;
+  // }
 
-  _computeEventOffset(event) {
-    const startTime = Number.parseInt(moment(event.startTime).format('HHmm'), 10);
-    return startTime*(this.scheduleHeight/2400);
-  }
+  // _computeEventOffset(event) {
+  //   const startTime = Number.parseInt(moment(event.startTime).format('HHmm'), 10);
+  //   return startTime*(this.scheduleHeight/2400);
+  // }
 }
 
 window.customElements.define('polymer-schedule', PolymerSchedule);
