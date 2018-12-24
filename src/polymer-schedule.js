@@ -191,8 +191,9 @@ class PolymerSchedule extends PolymerElement {
         var modified = false;
         overlaps[i].startUnder = -1;
         overlaps[i].units = 1;
+        overlaps[i].dirty = false;
         for (const j in overlaps) {
-          if (overlaps[i]._startTime >= overlaps[j]._endTime) {
+          if (overlaps[i]._startTime >= overlaps[j]._endTime && !overlaps[j].dirty) {
             if (!modified) {
               cols--;
               overlaps[i].startUnder = j;
@@ -200,9 +201,11 @@ class PolymerSchedule extends PolymerElement {
               overlaps[i].units--;
             }
             overlaps[i].units++;
+            overlaps[j].dirty = true;
           }
         }
       }
+      console.log(overlaps);
       for (const i in overlaps) {
         overlaps[i].width = overlaps[i].units*(100/cols);
         if (overlaps[i].startUnder != -1) {
